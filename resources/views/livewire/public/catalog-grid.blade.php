@@ -131,16 +131,7 @@
                 @endif
 
                 <div class="mt-8 border-t border-stone-200 pt-4">
-                    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                        <p class="text-sm text-stone-600">
-                            @if ($filteredCount > 0)
-                                Mostrando {{ $products->firstItem() }}-{{ $products->lastItem() }} de {{ $filteredCount }} perfumes
-                            @else
-                                0 perfumes encontrados de {{ $totalCount }}
-                            @endif
-                        </p>
-                        {{ $products->links() }}
-                    </div>
+                    {{ $products->links() }}
                 </div>
             </div>
         </div>
