@@ -25,7 +25,7 @@
         </div>
 
         <div class="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
-            <aside class="h-fit rounded-2xl border border-stone-200 p-5 shadow-sm lg:sticky lg:top-24">
+            <aside class="h-fit rounded-md border border-stone-200 p-5 shadow-sm lg:sticky lg:top-24">
                 <div class="mb-5 flex items-center justify-between">
                     <h2 class="text-lg font-bold text-stone-900">Filtros</h2>
                     @if ($activeFiltersCount > 0)

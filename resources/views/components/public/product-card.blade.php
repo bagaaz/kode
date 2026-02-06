@@ -12,7 +12,7 @@
 @endphp
 
 <a href="{{ $href }}" class="group block">
-    <article class="relative overflow-hidden rounded-2xl border border-stone-100 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+    <article class="relative overflow-hidden rounded-md border border-stone-100 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
         @if ($badge)
             <span class="absolute left-3 top-3 rounded-full bg-amber-300 px-2 py-1 text-xs font-medium text-stone-900">
                 {{ $badge }}
