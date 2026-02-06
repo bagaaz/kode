@@ -8,6 +8,7 @@
     $tags = $product['tags'] ?? [];
     $badge = $product['badge'] ?? null;
     $image = $product['image'] ?? null;
+    $price = $product['price'] ?? null;
 @endphp
 
 <a href="{{ $href }}" class="group block">
@@ -43,6 +44,11 @@
                 <p class="mt-1 text-sm font-light text-stone-600 line-clamp-2">
                     {{ $description }}
                 </p>
+                @if ($price)
+                    <p class="mt-2 text-sm font-semibold text-green">
+                        {{ $price }}
+                    </p>
+                @endif
             </div>
 
             @if (!empty($tags))
