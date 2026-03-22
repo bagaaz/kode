@@ -46,12 +46,9 @@ Route::prefix('admin')
         Route::patch('/perfumes/{perfume}/status', [PerfumeController::class, 'toggleStatus'])->name('perfumes.toggle-status');
 
         Route::get('/configuracoes-catalogo', [CatalogSettingsController::class, 'index'])->name('catalog-settings.index');
-        Route::post('/configuracoes-catalogo/familias', [CatalogSettingsController::class, 'storeFamily'])->name('catalog-settings.families.store');
-        Route::post('/configuracoes-catalogo/concentracoes', [CatalogSettingsController::class, 'storeConcentration'])->name('catalog-settings.concentrations.store');
-        Route::post('/configuracoes-catalogo/ocasioes', [CatalogSettingsController::class, 'storeOccasion'])->name('catalog-settings.occasions.store');
-        Route::post('/configuracoes-catalogo/intensidades', [CatalogSettingsController::class, 'storeIntensity'])->name('catalog-settings.intensities.store');
-        Route::post('/configuracoes-catalogo/tags', [CatalogSettingsController::class, 'storeTag'])->name('catalog-settings.tags.store');
-        Route::post('/configuracoes-catalogo/colecoes', [CatalogSettingsController::class, 'storeCollection'])->name('catalog-settings.collections.store');
+        Route::get('/configuracoes-catalogo/{type}', [CatalogSettingsController::class, 'typeIndex'])->name('catalog-settings.type');
+        Route::post('/configuracoes-catalogo/{type}/adicionar', [CatalogSettingsController::class, 'storeByType'])->name('catalog-settings.store');
+        Route::post('/configuracoes-catalogo/quick-create', [CatalogSettingsController::class, 'quickCreate'])->name('catalog-settings.quick-create');
         Route::get('/configuracoes-catalogo/{type}/{id}/editar', [CatalogSettingsController::class, 'edit'])->name('catalog-settings.edit');
         Route::put('/configuracoes-catalogo/{type}/{id}', [CatalogSettingsController::class, 'update'])->name('catalog-settings.update');
         Route::delete('/configuracoes-catalogo/{type}/{id}', [CatalogSettingsController::class, 'destroy'])->name('catalog-settings.destroy');

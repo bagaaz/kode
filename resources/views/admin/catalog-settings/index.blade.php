@@ -1,60 +1,42 @@
-<x-layouts.admin title="Configuracoes do Catalogo">
-    <section class="space-y-8">
+<x-layouts.admin title="Configurações do Catálogo">
+    <section class="space-y-6">
         <div>
-            <h2 class="text-base font-semibold text-stone-900">Cadastros auxiliares</h2>
-            <p class="mt-1 text-sm text-stone-600">Gerencie opcoes que alimentam filtros e formularios de perfumes.</p>
+            <p class="text-sm text-stone-500">Gerencie as opções que alimentam filtros e formulários de perfumes.</p>
         </div>
 
-        <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
-            <x-admin.catalog-card
-                title="Familias olfativas"
-                :submit-route="route('admin.catalog-settings.families.store')"
-                :items="$families"
-                type="families"
-                name-placeholder="Nome da familia"
-            />
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            @php
+                $types = [
+                    ['type' => 'families',       'label' => 'Famílias olfativas',  'icon' => 'lucide-leaf',        'description' => 'Famílias como floral, amadeirado, cítrico...'],
+                    ['type' => 'concentrations', 'label' => 'Concentrações',        'icon' => 'lucide-droplets',    'description' => 'EDP, EDT, parfum e variações...'],
+                    ['type' => 'occasions',      'label' => 'Ocasiões',             'icon' => 'lucide-calendar',    'description' => 'Dia a dia, noite, trabalho...'],
+                    ['type' => 'intensities',    'label' => 'Intensidades',         'icon' => 'lucide-flame',       'description' => 'Leve, moderado, intenso...'],
+                    ['type' => 'tags',           'label' => 'Tags',                 'icon' => 'lucide-tag',         'description' => 'Palavras-chave para filtros...'],
+                    ['type' => 'collections',    'label' => 'Coleções',             'icon' => 'lucide-package',     'description' => 'Coleções especiais de perfumes...'],
+                    ['type' => 'notes',          'label' => 'Notas olfativas',      'icon' => 'lucide-flower-2',    'description' => 'Ingredientes: bergamota, sândalo...'],
+                ];
+            @endphp
 
-            <x-admin.catalog-card
-                title="Concentracoes"
-                :submit-route="route('admin.catalog-settings.concentrations.store')"
-                :items="$concentrations"
-                type="concentrations"
-                name-placeholder="Nome da concentracao"
-            />
-
-            <x-admin.catalog-card
-                title="Ocasioes"
-                :submit-route="route('admin.catalog-settings.occasions.store')"
-                :items="$occasions"
-                type="occasions"
-                name-placeholder="Nome da ocasiao"
-            />
-
-            <x-admin.catalog-card
-                title="Intensidades"
-                :submit-route="route('admin.catalog-settings.intensities.store')"
-                :items="$intensities"
-                type="intensities"
-                name-placeholder="Nome da intensidade"
-            />
-
-            <x-admin.catalog-card
-                title="Tags"
-                :submit-route="route('admin.catalog-settings.tags.store')"
-                :items="$tags"
-                type="tags"
-                name-placeholder="Nome da tag"
-                description-placeholder="Descricao (opcional)"
-            />
-
-            <x-admin.catalog-card
-                title="Colecoes"
-                :submit-route="route('admin.catalog-settings.collections.store')"
-                :items="$collections"
-                type="collections"
-                name-placeholder="Nome da colecao"
-                :include-show-on-home="true"
-            />
+            @foreach ($types as $t)
+                <a
+                    href="{{ route('admin.catalog-settings.type', $t['type']) }}"
+                    class="group flex items-start gap-4 rounded-md border border-stone-200 bg-white p-5 shadow-sm transition hover:border-green/40 hover:shadow-md"
+                >
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-stone-100 text-stone-500 transition group-hover:bg-green/10 group-hover:text-green">
+                        <x-dynamic-component :component="$t['icon']" class="h-5 w-5" />
+                    </div>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2">
+                            <p class="font-semibold text-stone-900">{{ $t['label'] }}</p>
+                            <span class="rounded-full bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-600">
+                                {{ $counts[$t['type']] ?? 0 }}
+                            </span>
+                        </div>
+                        <p class="mt-0.5 text-xs text-stone-500">{{ $t['description'] }}</p>
+                    </div>
+                    <x-lucide-chevron-right class="ml-auto h-4 w-4 shrink-0 text-stone-300 transition group-hover:text-green" />
+                </a>
+            @endforeach
         </div>
     </section>
 </x-layouts.admin>

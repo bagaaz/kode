@@ -3,95 +3,83 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
+use App\Models\Perfume;
 
 class HomeController extends Controller
 {
     public function index()
     {
-        $mockImage = asset('/src/images/mini-perfume-exemplo.jpg');
+        $featured = Perfume::query()
+            ->with(['images', 'tags', 'fragranceFamily'])
+            ->active()
+            ->where('is_featured', true)
+            ->orderBy('release_order')
+            ->first();
 
-        $featured = [
-            'number' => '07',
-            'name' => 'Perfume 07',
-            'description' => 'Uma fragrancia sedutora que combina ambar dourado com baunilha de Madagascar. Notas de cafe torrado e chocolate amargo trazem uma qualidade gourmand irresistivel, enquanto patchouli e benjoim conferem profundidade.',
-            'tags' => ['Unissex', 'Climas frios', 'Noites especiais', 'Fixacao intensa'],
-            'href' => route('parfum', ['name' => '07']),
-            'image' => $mockImage,
-        ];
+        $launches = Perfume::query()
+            ->with(['images', 'tags', 'concentration'])
+            ->active()
+            ->where('is_new_release', true)
+            ->orderByDesc('created_at')
+            ->limit(10)
+            ->get();
 
-        $launchTemplates = [
-            [
-                'description' => 'Aromatico mediterraneo fresco e verde.',
-                'tags' => ['Fresco', 'Aromatico'],
-            ],
-            [
-                'description' => 'Frutado elegante com toques florais.',
-                'tags' => ['Frutado', 'Floral'],
-            ],
-            [
-                'description' => 'Tuberosa hipnotica com fundo cremoso.',
-                'tags' => ['Floral', 'Cremoso'],
-            ],
-            [
-                'description' => 'Couro refinado com tabaco e especiarias.',
-                'tags' => ['Couro', 'Especiado'],
-            ],
-        ];
-
-        $launches = [];
-        for ($i = 9; $i <= 18; $i++) {
-            $number = str_pad((string) $i, 2, '0', STR_PAD_LEFT);
-            $template = $launchTemplates[($i - 9) % count($launchTemplates)];
-
-            $launches[] = [
-                'number' => $number,
-                'name' => "Perfume {$number}",
-                'description' => $template['description'],
-                'tags' => $template['tags'],
-                'href' => route('parfum', ['name' => $number]),
-                'image' => $mockImage,
-            ];
-        }
-
-        $bestSellerTemplates = [
-            [
-                'description' => 'Frescor citrico com fundo amadeirado elegante.',
-                'tags' => ['Citrico', 'Amadeirado'],
-            ],
-            [
-                'description' => 'Floral intenso com notas orientais sensuais.',
-                'tags' => ['Floral', 'Oriental'],
-            ],
-            [
-                'description' => 'Aquatico fresco com notas minerais unicas.',
-                'tags' => ['Aquatico', 'Mineral'],
-            ],
-            [
-                'description' => 'Oud nobre com especiarias orientais refinadas.',
-                'tags' => ['Oud', 'Oriental'],
-            ],
-        ];
-
-        $bestSellers = [];
-        for ($i = 1; $i <= 10; $i++) {
-            $number = str_pad((string) $i, 2, '0', STR_PAD_LEFT);
-            $template = $bestSellerTemplates[($i - 1) % count($bestSellerTemplates)];
-
-            $bestSellers[] = [
-                'badge' => "#{$i}",
-                'number' => $number,
-                'name' => "Perfume {$number}",
-                'description' => $template['description'],
-                'tags' => $template['tags'],
-                'href' => route('parfum', ['name' => $number]),
-                'image' => $mockImage,
-            ];
-        }
+        $bestSellers = Perfume::query()
+            ->with(['images', 'tags', 'concentration'])
+            ->active()
+            ->whereNotNull('best_seller_rank')
+            ->orderBy('best_seller_rank')
+            ->limit(10)
+            ->get();
 
         return view('public.home', [
-            'featured' => $featured,
-            'launches' => $launches,
-            'bestSellers' => $bestSellers,
+            'featured'    => $this->mapFeatured($featured),
+            'launches'    => $launches->map(fn ($p) => $this->mapProduct($p))->all(),
+            'bestSellers' => $bestSellers->map(fn ($p, $i) => $this->mapProduct($p, '#'.($i + 1)))->all(),
         ]);
+    }
+
+    private function mapFeatured(?Perfume $perfume): array
+    {
+        if (! $perfume) {
+            return [
+                'number'      => '—',
+                'name'        => 'Em breve',
+                'description' => 'Novidades chegando em breve.',
+                'tags'        => [],
+                'href'        => route('catalog'),
+                'image'       => null,
+            ];
+        }
+
+        return [
+            'number'      => $perfume->code,
+            'name'        => $perfume->name,
+            'description' => $perfume->short_description ?? $perfume->description,
+            'tags'        => $perfume->tags->pluck('name')->all(),
+            'href'        => route('parfum', ['name' => $perfume->slug ?? $perfume->code]),
+            'image'       => $this->imageUrl($perfume),
+        ];
+    }
+
+    private function mapProduct(Perfume $perfume, ?string $badge = null): array
+    {
+        return [
+            'number'      => $perfume->code,
+            'name'        => $perfume->name,
+            'description' => $perfume->short_description ?? $perfume->description,
+            'tags'        => $perfume->tags->pluck('name')->all(),
+            'badge'       => $badge ?? $perfume->concentration?->name,
+            'href'        => route('parfum', ['name' => $perfume->slug ?? $perfume->code]),
+            'image'       => $this->imageUrl($perfume),
+            'price'       => 'R$ '.number_format((float) $perfume->price, 2, ',', '.'),
+        ];
+    }
+
+    private function imageUrl(Perfume $perfume): ?string
+    {
+        $path = $perfume->images->first()?->path;
+
+        return $path ? asset($path) : null;
     }
 }

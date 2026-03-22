@@ -183,18 +183,20 @@ class PerfumeController extends Controller
         $primaryImage = $perfume->images()->where('is_primary', true)->first();
         $imagePath = $this->resolveCoverImagePath($perfume, $data['cover_image'] ?? null, $primaryImage?->path);
 
-        if ($primaryImage) {
-            $primaryImage->update([
-                'path' => $imagePath,
-                'alt_text' => $perfume->name,
-            ]);
-        } else {
-            $perfume->images()->create([
-                'path' => $imagePath,
-                'alt_text' => $perfume->name,
-                'sort_order' => 0,
-                'is_primary' => true,
-            ]);
+        if ($imagePath !== null) {
+            if ($primaryImage) {
+                $primaryImage->update([
+                    'path' => $imagePath,
+                    'alt_text' => $perfume->name,
+                ]);
+            } else {
+                $perfume->images()->create([
+                    'path' => $imagePath,
+                    'alt_text' => $perfume->name,
+                    'sort_order' => 0,
+                    'is_primary' => true,
+                ]);
+            }
         }
 
         if (! empty($data['default_volume_ml'])) {
@@ -218,10 +220,10 @@ class PerfumeController extends Controller
         }
     }
 
-    private function resolveCoverImagePath(Perfume $perfume, ?UploadedFile $file, ?string $currentPath): string
+    private function resolveCoverImagePath(Perfume $perfume, ?UploadedFile $file, ?string $currentPath): ?string
     {
         if ($file) {
-            if ($currentPath && str_starts_with($currentPath, '/storage/perfumes/')) {
+            if ($currentPath && str_starts_with($currentPath, '/storage/')) {
                 Storage::disk('public')->delete(Str::after($currentPath, '/storage/'));
             }
 
@@ -230,7 +232,7 @@ class PerfumeController extends Controller
             return '/storage/'.$storedPath;
         }
 
-        return $currentPath ?: '/src/images/mini-perfume-exemplo.jpg';
+        return $currentPath ?: null;
     }
 
     private function formData(array $extra = []): array

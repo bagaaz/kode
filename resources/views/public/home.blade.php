@@ -2,49 +2,87 @@
     <x-public.header />
 
     <main class="overflow-hidden">
-        <section class="relative overflow-hidden bg-gradient-to-br from-amber-100 via-amber-200/70 to-emerald-100 py-20 md:py-28">
-            <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.7)_0,transparent_55%),radial-gradient(circle_at_80%_10%,rgba(255,255,255,0.6)_0,transparent_45%)]"></div>
-            <div class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_50%_50%,rgba(120,113,108,0.25)_1px,transparent_1px)] bg-[length:26px_26px]"></div>
+
+        {{-- Hero --}}
+        <section class="relative overflow-hidden bg-green py-24 md:py-36">
+            {{-- Dot pattern --}}
+            <div class="absolute inset-0 opacity-[0.06] bg-[radial-gradient(circle,rgba(199,161,90,1)_1px,transparent_1px)] bg-[length:28px_28px]"></div>
+            {{-- Radial glow --}}
+            <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(199,161,90,0.12)_0,transparent_65%)]"></div>
+            {{-- Large decorative number --}}
+            <div class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/4 select-none text-[22rem] font-bold leading-none tracking-tighter text-stone-50/[0.03] md:text-[28rem]">01</div>
+
             <div class="relative mx-auto w-full max-w-6xl px-4">
                 <div class="mx-auto max-w-3xl text-center">
-                    <span class="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-1.5 text-sm font-medium text-amber-700">
+                    <span class="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-4 py-1.5 text-sm font-medium text-gold">
                         <x-lucide-sparkles class="h-4 w-4" />
-                        Colecao exclusiva
+                        Coleção exclusiva
                     </span>
 
-                    <h1 class="mt-6 text-4xl font-bold leading-tight text-stone-900 md:text-6xl">
-                        Descubra sua <span class="text-amber-700">assinatura olfativa</span>
+                    <h1 class="mt-8 text-5xl font-bold leading-tight tracking-tight text-stone-50 md:text-7xl">
+                        Descubra sua<br>
+                        <span class="text-gold">assinatura olfativa</span>
                     </h1>
-                    <p class="mt-6 text-lg text-stone-700">
-                        Uma colecao de fragrancias unicas, numeradas e cuidadosamente desenvolvidas
+
+                    <p class="mt-6 text-lg font-light leading-relaxed text-stone-300">
+                        Uma coleção de fragrâncias únicas, numeradas e cuidadosamente desenvolvidas
                         para cada momento da sua vida.
                     </p>
 
-                    <div class="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                        <x-ui.button
-                            href="{{ route('catalog') }}"
-                            variant="secondary"
-                            size="lg"
-                            icon="lucide-arrow-right"
-                        >
-                            Explorar catalogo
+                    <div class="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+                        <x-ui.button href="{{ route('catalog') }}" variant="secondary" size="lg" icon="lucide-arrow-right">
+                            Explorar catálogo
                         </x-ui.button>
-                        <x-ui.button
-                            href="{{ $launches[0]['href'] ?? route('catalog') }}"
-                            variant="outline"
-                            size="lg"
-                        >
-                            Ver lancamentos
+                        <x-ui.button href="{{ $launches[0]['href'] ?? route('catalog') }}" variant="white" size="lg">
+                            Ver lançamentos
                         </x-ui.button>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section class="py-16">
+        {{-- Brand pillars --}}
+        <section class="border-b border-stone-200/60 bg-white py-14">
+            <div class="mx-auto w-full max-w-6xl px-4">
+                <div class="grid gap-8 sm:grid-cols-3">
+                    <div class="flex flex-col items-center gap-4 text-center">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-full border border-gold/30 bg-gold/10">
+                            <x-lucide-sparkles class="h-5 w-5 text-gold" />
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-stone-900">Exclusivas</h3>
+                            <p class="mt-1 text-sm font-light text-stone-500">Fragrâncias únicas e em tiragem limitada, criadas para quem valoriza o singular.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col items-center gap-4 text-center">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-full border border-gold/30 bg-gold/10">
+                            <x-lucide-flask-conical class="h-5 w-5 text-gold" />
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-stone-900">Artesanais</h3>
+                            <p class="mt-1 text-sm font-light text-stone-500">Desenvolvidas com ingredientes selecionados e processo artesanal de alta perfumaria.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col items-center gap-4 text-center">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-full border border-gold/30 bg-gold/10">
+                            <x-lucide-hash class="h-5 w-5 text-gold" />
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-stone-900">Numeradas</h3>
+                            <p class="mt-1 text-sm font-light text-stone-500">Cada frasco é identificado — sua fragrância tem identidade, história e código próprio.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {{-- Featured product --}}
+        <section class="py-20">
             <div class="mx-auto w-full max-w-6xl px-4">
                 <div class="grid gap-12 md:grid-cols-2 md:items-center">
-                    <div class="relative aspect-square overflow-hidden rounded-3xl bg-gradient-to-br from-stone-100 via-amber-100 to-stone-200">
+                    <div class="relative aspect-square overflow-hidden rounded-xl bg-gradient-to-br from-stone-100 via-stone-50 to-gold-muted/30 shadow-md">
                         <img
                             src="{{ $featured['image'] ?? asset('images/mini-perfume-exemplo.svg') }}"
                             alt="{{ $featured['name'] }}"
@@ -53,22 +91,22 @@
                         />
                         <div class="absolute inset-0 bg-gradient-to-t from-stone-900/20 to-transparent"></div>
                     </div>
+
                     <div class="space-y-6">
-                        <span class="inline-flex items-center gap-2 text-sm font-medium uppercase tracking-wide text-amber-600">
-                            <x-lucide-star class="h-4 w-4" />
-                            Destaque da colecao
-                        </span>
-                        <h2 class="text-4xl font-bold text-stone-900 md:text-5xl">
+                        <x-ui.section-heading label="Destaque da coleção">
                             {{ $featured['name'] }}
-                        </h2>
-                        <p class="text-lg text-stone-600">
+                        </x-ui.section-heading>
+
+                        <p class="text-base font-light leading-relaxed text-stone-600">
                             {{ $featured['description'] }}
                         </p>
+
                         <div class="flex flex-wrap gap-2">
                             @foreach ($featured['tags'] as $tag)
                                 <x-ui.badge variant="gold">{{ $tag }}</x-ui.badge>
                             @endforeach
                         </div>
+
                         <x-ui.button href="{{ $featured['href'] }}" icon="lucide-arrow-right">
                             Ver detalhes
                         </x-ui.button>
@@ -78,7 +116,7 @@
         </section>
 
         <livewire:public.product-carousel
-            title="Lancamentos"
+            title="Lançamentos"
             subtitle="Novidades"
             :products="$launches"
             action-label="Ver todos"
@@ -89,30 +127,30 @@
             title="Mais vendidos"
             subtitle="Favoritos"
             :products="$bestSellers"
-            action-label="Ver catalogo"
+            action-label="Ver catálogo"
             :action-href="route('catalog')"
-            section-class="bg-stone-100/70"
+            section-class="bg-white"
         />
 
-        <section class="bg-gradient-to-r from-stone-900 via-stone-800 to-stone-900 py-20">
-            <div class="mx-auto w-full max-w-4xl px-4 text-center">
-                <h2 class="text-3xl font-bold text-stone-50 md:text-4xl">
-                    Encontre seu perfume ideal
-                </h2>
-                <p class="mt-4 text-lg text-stone-300">
-                    Use nossos filtros avancados para descobrir a fragrancia perfeita para cada ocasiao.
-                </p>
-                <x-ui.button
-                    href="{{ route('catalog') }}"
-                    variant="secondary"
-                    size="lg"
-                    icon="lucide-arrow-right"
-                    class="mt-8"
-                >
-                    Explorar catalogo completo
-                </x-ui.button>
+        {{-- CTA --}}
+        <section class="bg-green py-20">
+            <div class="relative mx-auto w-full max-w-4xl px-4 text-center">
+                <div class="absolute inset-0 opacity-[0.05] bg-[radial-gradient(circle,rgba(199,161,90,1)_1px,transparent_1px)] bg-[length:24px_24px]"></div>
+                <div class="relative space-y-6">
+                    <x-ui.section-heading align="center" size="md">
+                        <span class="text-stone-50">Encontre seu</span>
+                        <span class="text-gold"> perfume ideal</span>
+                    </x-ui.section-heading>
+                    <p class="text-base font-light text-stone-300">
+                        Use nossos filtros avançados para descobrir a fragrância perfeita para cada ocasião.
+                    </p>
+                    <x-ui.button href="{{ route('catalog') }}" variant="secondary" size="lg" icon="lucide-arrow-right">
+                        Explorar catálogo completo
+                    </x-ui.button>
+                </div>
             </div>
         </section>
+
     </main>
 
     <x-public.footer />

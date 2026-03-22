@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Concentration;
 use App\Models\FragranceFamily;
 use App\Models\Intensity;
+use App\Models\Note;
 use App\Models\Occasion;
 use App\Models\PerfumeCollection;
 use App\Models\Tag;
 use Illuminate\Database\QueryException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -20,57 +22,56 @@ class CatalogSettingsController extends Controller
 {
     public function index(): View
     {
-        return view('admin.catalog-settings.index', [
-            'families' => FragranceFamily::query()->orderBy('sort_order')->orderBy('name')->get(),
-            'concentrations' => Concentration::query()->orderBy('sort_order')->orderBy('name')->get(),
-            'occasions' => Occasion::query()->orderBy('sort_order')->orderBy('name')->get(),
-            'intensities' => Intensity::query()->orderBy('sort_order')->orderBy('name')->get(),
-            'tags' => Tag::query()->orderBy('sort_order')->orderBy('name')->get(),
-            'collections' => PerfumeCollection::query()->orderBy('sort_order')->orderBy('name')->get(),
+        $counts = [];
+        foreach ($this->allTypeConfigs() as $key => $cfg) {
+            $counts[$key] = $cfg['model']::query()->count();
+        }
+
+        return view('admin.catalog-settings.index', ['counts' => $counts]);
+    }
+
+    public function typeIndex(string $type): View
+    {
+        $config = $this->resolveTypeConfig($type);
+
+        $items = $config['model']::query()
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->paginate(20);
+
+        return view('admin.catalog-settings.type', [
+            'type'         => $type,
+            'label'        => $config['label'],
+            'labelPlural'  => $config['labelPlural'],
+            'items'        => $items,
+            'isCollection' => $type === 'collections',
         ]);
     }
 
-    public function storeFamily(Request $request): RedirectResponse
+    public function storeByType(Request $request, string $type): RedirectResponse
     {
-        $this->createSimpleCatalogEntity($request, FragranceFamily::class, 'familia');
+        $config = $this->resolveTypeConfig($type);
 
-        return back()->with('success', 'Familia cadastrada com sucesso.');
+        if ($type === 'collections') {
+            $data = $this->validateCollection($request);
+            $config['model']::create($this->collectionPayload($data));
+        } else {
+            $data = $this->validateSimpleCatalogEntity($request, $config['model'], $config['label']);
+            $config['model']::create($this->simpleEntityPayload($data));
+        }
+
+        return back()->with('success', ucfirst($config['labelPlural']).' cadastrado com sucesso.');
     }
 
-    public function storeConcentration(Request $request): RedirectResponse
+    public function quickCreate(Request $request): JsonResponse
     {
-        $this->createSimpleCatalogEntity($request, Concentration::class, 'concentracao');
+        $type = $request->input('type');
+        $config = $this->resolveTypeConfig($type);
 
-        return back()->with('success', 'Concentracao cadastrada com sucesso.');
-    }
+        $data = $this->validateSimpleCatalogEntity($request, $config['model'], $config['label']);
+        $item = $config['model']::create($this->simpleEntityPayload($data));
 
-    public function storeOccasion(Request $request): RedirectResponse
-    {
-        $this->createSimpleCatalogEntity($request, Occasion::class, 'ocasiao');
-
-        return back()->with('success', 'Ocasiao cadastrada com sucesso.');
-    }
-
-    public function storeIntensity(Request $request): RedirectResponse
-    {
-        $this->createSimpleCatalogEntity($request, Intensity::class, 'intensidade');
-
-        return back()->with('success', 'Intensidade cadastrada com sucesso.');
-    }
-
-    public function storeTag(Request $request): RedirectResponse
-    {
-        $this->createSimpleCatalogEntity($request, Tag::class, 'tag');
-
-        return back()->with('success', 'Tag cadastrada com sucesso.');
-    }
-
-    public function storeCollection(Request $request): RedirectResponse
-    {
-        $data = $this->validateCollection($request);
-        PerfumeCollection::create($this->collectionPayload($data));
-
-        return back()->with('success', 'Colecao cadastrada com sucesso.');
+        return response()->json(['id' => $item->id, 'name' => $item->name]);
     }
 
     public function edit(string $type, int $id): View
@@ -79,11 +80,11 @@ class CatalogSettingsController extends Controller
         $item = $config['model']::query()->findOrFail($id);
 
         return view('admin.catalog-settings.edit', [
-            'type' => $type,
-            'label' => $config['label'],
-            'item' => $item,
+            'type'        => $type,
+            'label'       => $config['label'],
+            'item'        => $item,
             'isCollection' => $type === 'collections',
-            'indexRoute' => route('admin.catalog-settings.index'),
+            'indexRoute'  => route('admin.catalog-settings.type', $type),
         ]);
     }
 
@@ -101,8 +102,8 @@ class CatalogSettingsController extends Controller
         }
 
         return redirect()
-            ->route('admin.catalog-settings.index')
-            ->with('success', ucfirst($config['label']).' atualizada com sucesso.');
+            ->route('admin.catalog-settings.type', $type)
+            ->with('success', ucfirst($config['label']).' atualizado com sucesso.');
     }
 
     public function destroy(string $type, int $id): RedirectResponse
@@ -113,16 +114,10 @@ class CatalogSettingsController extends Controller
         try {
             $item->delete();
         } catch (QueryException) {
-            return back()->with('error', 'Nao foi possivel excluir: item em uso por outros registros.');
+            return back()->with('error', 'Não foi possível excluir: item em uso por outros registros.');
         }
 
-        return back()->with('success', ucfirst($config['label']).' excluida com sucesso.');
-    }
-
-    private function createSimpleCatalogEntity(Request $request, string $modelClass, string $entityName): void
-    {
-        $data = $this->validateSimpleCatalogEntity($request, $modelClass, $entityName);
-        $modelClass::create($this->simpleEntityPayload($data));
+        return back()->with('success', ucfirst($config['label']).' excluído com sucesso.');
     }
 
     private function validateSimpleCatalogEntity(
@@ -147,8 +142,8 @@ class CatalogSettingsController extends Controller
                 Rule::unique($table, 'slug')->ignore($ignoreId),
             ],
             'description' => ['nullable', 'string'],
-            'sort_order' => ['nullable', 'integer', 'min:0'],
-            'is_active' => ['nullable', 'boolean'],
+            'sort_order'  => ['nullable', 'integer', 'min:0'],
+            'is_active'   => ['nullable', 'boolean'],
         ], [], [
             'name' => "nome da {$entityName}",
             'slug' => "slug da {$entityName}",
@@ -158,11 +153,11 @@ class CatalogSettingsController extends Controller
     private function simpleEntityPayload(array $data): array
     {
         return [
-            'name' => $data['name'],
-            'slug' => Str::slug($data['slug'] ?: $data['name']),
+            'name'        => $data['name'],
+            'slug'        => Str::slug($data['slug'] ?: $data['name']),
             'description' => $data['description'] ?? null,
-            'sort_order' => (int) ($data['sort_order'] ?? 0),
-            'is_active' => (bool) ($data['is_active'] ?? false),
+            'sort_order'  => (int) ($data['sort_order'] ?? 0),
+            'is_active'   => (bool) ($data['is_active'] ?? false),
         ];
     }
 
@@ -181,41 +176,47 @@ class CatalogSettingsController extends Controller
                 'max:255',
                 Rule::unique('perfume_collections', 'slug')->ignore($ignoreId),
             ],
-            'description' => ['nullable', 'string'],
-            'sort_order' => ['nullable', 'integer', 'min:0'],
-            'is_active' => ['nullable', 'boolean'],
-            'show_on_home' => ['nullable', 'boolean'],
+            'description'   => ['nullable', 'string'],
+            'sort_order'    => ['nullable', 'integer', 'min:0'],
+            'is_active'     => ['nullable', 'boolean'],
+            'show_on_home'  => ['nullable', 'boolean'],
         ]);
     }
 
     private function collectionPayload(array $data): array
     {
         return [
-            'name' => $data['name'],
-            'slug' => Str::slug($data['slug'] ?: $data['name']),
-            'description' => $data['description'] ?? null,
-            'sort_order' => (int) ($data['sort_order'] ?? 0),
-            'is_active' => (bool) ($data['is_active'] ?? false),
+            'name'         => $data['name'],
+            'slug'         => Str::slug($data['slug'] ?: $data['name']),
+            'description'  => $data['description'] ?? null,
+            'sort_order'   => (int) ($data['sort_order'] ?? 0),
+            'is_active'    => (bool) ($data['is_active'] ?? false),
             'show_on_home' => (bool) ($data['show_on_home'] ?? false),
+        ];
+    }
+
+    /** @return array<string, array{model: class-string, label: string, labelPlural: string}> */
+    private function allTypeConfigs(): array
+    {
+        return [
+            'families'       => ['model' => FragranceFamily::class,  'label' => 'família',      'labelPlural' => 'família'],
+            'concentrations' => ['model' => Concentration::class,    'label' => 'concentração', 'labelPlural' => 'concentração'],
+            'occasions'      => ['model' => Occasion::class,         'label' => 'ocasião',      'labelPlural' => 'ocasião'],
+            'intensities'    => ['model' => Intensity::class,        'label' => 'intensidade',  'labelPlural' => 'intensidade'],
+            'tags'           => ['model' => Tag::class,              'label' => 'tag',          'labelPlural' => 'tag'],
+            'collections'    => ['model' => PerfumeCollection::class,'label' => 'coleção',      'labelPlural' => 'coleção'],
+            'notes'          => ['model' => Note::class,             'label' => 'nota',         'labelPlural' => 'nota'],
         ];
     }
 
     private function resolveTypeConfig(string $type): array
     {
-        $config = match ($type) {
-            'families' => ['model' => FragranceFamily::class, 'label' => 'familia'],
-            'concentrations' => ['model' => Concentration::class, 'label' => 'concentracao'],
-            'occasions' => ['model' => Occasion::class, 'label' => 'ocasiao'],
-            'intensities' => ['model' => Intensity::class, 'label' => 'intensidade'],
-            'tags' => ['model' => Tag::class, 'label' => 'tag'],
-            'collections' => ['model' => PerfumeCollection::class, 'label' => 'colecao'],
-            default => null,
-        };
+        $configs = $this->allTypeConfigs();
 
-        if (! $config) {
+        if (! isset($configs[$type])) {
             abort(404);
         }
 
-        return $config;
+        return $configs[$type];
     }
 }

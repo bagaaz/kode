@@ -14,6 +14,7 @@
         'secondary' => 'bg-gold text-stone-900 hover:bg-gold-hover',
         'outline' => 'border border-green text-green hover:bg-green/10',
         'ghost' => 'text-stone-700 hover:text-stone-900 hover:bg-stone-100',
+        'white' => 'border border-stone-50/40 bg-transparent text-stone-50 hover:bg-stone-50/10',
     ];
     $sizes = [
         'sm' => 'h-9 px-4 text-sm',

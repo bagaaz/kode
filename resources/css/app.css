@@ -11,7 +11,41 @@
 
     --color-green: #065037;
     --color-green-hover: #074f06;
+    --color-green-light: #0a7050;
     --color-gold: #c7a15a;
-    --color-gold-hover: #c7bb5a;
+    --color-gold-hover: #b8913f;
+    --color-gold-muted: #e8d5b0;
+    --color-cream: #faf7f2;
     --color-white-brand: #e6f3ff;
+}
+
+@layer base {
+    [x-cloak] { display: none !important; }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    ::selection {
+        background-color: rgb(199 161 90 / 0.25);
+        color: #065037;
+    }
+
+    ::-webkit-scrollbar {
+        width: 5px;
+        height: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: rgb(199 161 90 / 0.4);
+        border-radius: 999px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #c7a15a;
+    }
 }

@@ -4,7 +4,7 @@
     $variants = [
         'soft' => 'bg-stone-100 text-stone-700',
         'solid' => 'bg-stone-900 text-stone-50',
-        'gold' => 'bg-amber-300 text-stone-900',
+        'gold' => 'bg-gold-muted text-stone-900',
         'green' => 'bg-green text-stone-50'
     ];
 
