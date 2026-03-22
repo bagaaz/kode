@@ -31,7 +31,11 @@ class LoginController extends Controller
         ], $remember)) {
             $request->session()->regenerate();
 
-            return redirect()->intended(route('home'));
+            if ($request->user()?->isAdmin()) {
+                return redirect()->intended(route('admin.dashboard'));
+            }
+
+            return redirect()->route('home');
         }
 
         return back()
